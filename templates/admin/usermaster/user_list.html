@@ -1,0 +1,202 @@
+{% extends "index.html" %}
+{% load static %}
+{% block head %}
+
+{% endblock %}
+{% block heading %}
+<span class="tab-title">
+  <span class="px-1"> User Master</span>
+</span>
+{% endblock %}
+{% block body %}
+<div class="d-flex justify-content-end">
+
+
+</div>
+<div class="row">
+  <table id="example" class="table table-striped table-bordered" style="width:100%">
+    <thead>
+      <tr>
+        <th style="width:10%">Sr No</th>
+        <th style="width:60%">Mobile Number</th>
+        <th style="width:20%">Email</th>
+        <th style="width:10%">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="table_body">
+
+    </tbody>
+  </table>
+  <div class=" d-flex justify-content-end m-3" id="secondpagination-demo2">
+    <ul id="pagination-demo2" class="pagination-sm"></ul>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  $(document).ready(function () {
+    Pagination();
+  });
+
+  function get_user_list(p) {
+    
+    var fd = new FormData()
+    fd.append('p', p)
+    fd.append('csrfmiddlewaretoken', '{{csrf_token}}')
+    $.ajax({
+      url: frontend_url + "get_user_list",
+      data: fd,
+      type: 'POST',
+      processData: false,
+      contentType: false,
+      beforeSend: function () {
+        Swal.fire({
+          icon: "info",
+          title: "",
+          text: "Loading...",
+          buttons: false,
+
+        });
+      },
+      success: function (response) {
+        Swal.close();
+        var infohtml = ''
+
+        console.log('response d', response)
+        if (response.response.n == 1) {
+          var counter = 0
+
+          $.each(response.data, function (i, o) {
+            var email =''
+            if(o.email !='' && o.email != null){
+              email=o.email
+            }
+            counter += 1
+            infohtml += `
+                    <tr>
+                        <td>`+ counter + `</td>
+                        <td>`+ o.Username + `</td>
+                        <td>`+ email + `</td>
+
+                        <td>
+                          <a onclick="delete_user('`+ o.id + `');" class="text-danger" title="Delete" ><i class="fa fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    `
+
+          });
+          $('#table_body').html(infohtml);
+          var totalfilter = Math.ceil(parseInt(response.response.count) / 10);
+          $('#pagination-demo2').twbsPagination({
+            totalPages: totalfilter,
+            visiblePages: 3,
+            next: 'Next',
+            prev: 'Prev',
+            onPageClick: function (event, page) {
+              var testflag = true;
+              //fetch content and render here
+              filternamepageno = page
+              if (testflag == true) {
+                testflag = false;
+                get_user_list(page)
+              }
+              $('#page-content').text('Page ' + page) + ' content here';
+            }
+          })
+
+
+
+
+        } else {
+          infohtml = `
+              <tr class="border-bottom text-center">
+                      <td colspan="4">No user found</td>
+                  </tr>
+              `
+          $('#table_body').html(infohtml);
+
+          Swal.fire({
+            icon: "error",
+            title: "",
+            text: "No user found !",
+            button: "Close",
+          });
+        }
+
+      }
+    })
+
+  }
+
+  function Pagination() {
+    var testflag = true;
+    $('#secondpagination-demo2').html('<ul id="pagination-demo2" class="pagination-sm"></ul>');
+    get_user_list(1);
+
+  }
+
+  function delete_user(id) {
+    debugger
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+
+        var fd = new FormData()
+        fd.append('id', id)
+        fd.append('csrfmiddlewaretoken', '{{csrf_token}}')
+        $.ajax({
+          url: frontend_url + "delete_user",
+          data: fd,
+          type: 'POST',
+          processData: false,
+          contentType: false,
+          beforeSend: function () {
+            Swal.fire({
+              icon: "info",
+              title: "",
+              text: "Loading...",
+              buttons: false,
+
+            });
+          },
+          success: function (response) {
+            Swal.close();
+
+            console.log('response d', response)
+
+            if (response.response.n == 1) {
+              Swal.fire({
+                text: response.response.msg,
+                icon: 'success',
+              }).then((result) => {
+                window.location.href = "/get_user_list";
+
+              });
+            } else {
+              Swal.fire({
+                text: response.response.msg,
+                icon: 'error',
+              })
+            }
+          }
+        })
+
+      }
+    });
+  }
+
+
+</script>
+{% endblock %}

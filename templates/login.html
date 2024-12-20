@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% load static %}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Modernize Free</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'assets/images/logos/favicon.png' %}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />    
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
+
+    <link rel="stylesheet" href=" {% static 'assets/css/styles.min.css' %}" />
+    <style></style>
+  </head>
+
+  <body>
+    <!-- Body Wrapper -->
+    <div class="page-wrapper login-background" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full" data-sidebar-position="fixed" data-header-position="fixed">
+      <div class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center">
+        <div class="d-flex align-items-center justify-content-center w-100">
+          <div class="row justify-content-center w-100">
+            <div class="col-md-12 col-lg-6 col-xxl-6">
+              <div class="content">
+                <img src="{% static 'assets/images/13315.jpg' %}" alt="Pair programming" class="img-fluid w-75 mx-auto" />
+              </div>
+            </div>
+            <div class="col-md-3 col-lg-3 col-xxl-3">
+              <div class="card mb-0 login-card">
+                <div class="card-body">
+                  <p class="text-center" style="font-size: 25px;font-weight: 700;color: #9b00ff;">Welcome To Matka Live</p>
+                  <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                      <label for="exampleInputphone1" class="form-label">Phone <span class="text-danger">*</span> </label>
+                      <input type="text" name="mobileNumber" class="form-control" id="phone" aria-describedby="phoneHelp" oninput="this.value = this.value.replace(/[^0-9]+/g,'').replace(/(\..*)\./g, '$1');" maxlength="10"/>
+                      <div id="phone_error" class="form-text error_message"></div>
+
+                    </div>
+                    <div class="mb-4">
+                      <label for="exampleInputPassword1" class="form-label">Password <span class="text-danger">*</span> </label>
+                      <input type="password" name="password" class="form-control" id="password" />
+                      <span toggle="#password" class="fa fa-fw fa-eye-slash field-icon toggle-password"></span>
+                      <div id="password_error" class="form-text error_message"></div>
+
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                      <div class="form-check">
+                       </div>
+                      <!-- <a class="text-primary fw-bold" href="/user/forgot_password">Forgot Password ?</a> -->
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2" onclick=" return validate_form()">Login</button>
+                    <input type="text" name="source" class="d-none" value="Web" />
+
+  
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <script src="{% static 'assets/libs/jquery/dist/jquery.min.js' %}"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="{% static 'js/index.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- <script src="{% static 'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script> -->
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+      function validate_form(){
+        debugger
+        var phone=$('#phone').val();
+        var password=$('#password').val();
+        if(IsValid(phone)){
+          $('#phone').html();
+          $('#phone_error').show().delay(3000).slideUp();
+          $('#phone_error').html('Please enter phone');
+          $('#phone').focus();
+          return false;
+        }
+        
+        if(IsValid(password)){
+          $('#password').html();
+          $('#password_error').show().delay(3000).slideUp();
+          $('#password_error').html('Please enter password');
+          $('#password').focus();
+          return false;
+        }
+      }
+    </script>
+    {% if messages %}
+      <div class="alert admin-alert">
+        {% for message in messages %}
+          {% comment %} <div class="notice notice-{{ message.tags }}">
+            <strong class="msg-{{ message.tags }}">Message</strong> {{ message }}
+          </div> {% endcomment %}
+
+          <script>
+            var m = '{{ message }}'
+            var ic = '{{ message.tags }}'
+            Swal.fire({
+              icon: ic,
+              text: m,
+              timer: 1500 ,
+            })
+          </script>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </body>
+</html>
