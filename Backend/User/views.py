@@ -141,13 +141,15 @@ class logout(GenericAPIView):
     authentication_classes=[userJWTAuthentication]
     permission_classes = (permissions.IsAuthenticated,)
     def post(self,request):
-        logouttoken = request.data['logouttoken']
-        print("logouttoken",logouttoken)
+        logouttoken = request.data.get('logouttoken')
+        print("logouttoken1",logouttoken)
 
         if logouttoken is None or logouttoken =='':
-            logouttoken=request.user.token
-        object = UserToken.objects.filter(authToken=logouttoken,isActive=True).first()
-        if object is not None:
+            logouttoken=request.session.get('token')
+            print("logouttoken2",logouttoken)
+
+        objectd = UserToken.objects.filter(authToken=logouttoken,isActive=True).first()
+        if objectd is not None:
             tokenfalse = UserToken.objects.filter(authToken=logouttoken,isActive=True).update(isActive=False)
             return Response({
                             "data" : '',

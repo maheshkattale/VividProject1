@@ -1,0 +1,126 @@
+{% extends "index.html" %}
+{% load static %}
+{% block head %}
+
+{% endblock %}
+{% block heading %}
+  Add Company
+{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-end">
+
+
+</div>
+<div class="row">
+  <div class="row">
+    <div class="mb-3 col-lg-4">
+      <label for="companyname" class="form-label">Comapny Name <span class="text-danger">*</span> </label>
+      <input type="text" class="form-control" id="companyname" placeholder="Please enter name" aria-describedby="companyname_error" maxlength="250" oninput="this.value = this.value.replace(/[^a-zA-Z ]+/g,'').replace(/(\..*)\./g, '$1');"/>
+      <div id="companyname_error" class="form-text error_message"></div>
+    </div>
+
+
+
+
+    <div class="mb-3 col-lg-12 px-2">
+      <label for="games" class="form-label">Games</label>
+      <select id="games" class="form-select select2" aria-describedby="games_erroredit" multiple>
+        {% for i in games %}
+        <option value="{{i.id}}">{{i.gamename}}</option>
+       {%endfor%}
+      </select>
+      <div id="games_erroredit" class="form-text error_message"></div>
+    </div>
+
+
+
+
+    <div class="mb-3 col-lg-12">
+      <label for="companydescription" class="form-label">Company Description </label>
+      <textarea class="form-control" name="companydescription"  maxlength="500" id="companydescription" cols="30" rows="5" placeholder="Please enter Description" aria-describedby="companydescription_error"></textarea>
+      <div id="companydescription_error" class="form-text error_message"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="d-flex justify-content-center">
+      <a  class="btn btn-primary" onclick="validate_form();">Submit</a>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  $(document).ready(function () {
+  });
+
+
+  function validate_form(){
+    debugger
+    var companyname=$('#companyname').val();
+    var games=$('#games').val();
+    var companydescription=$('#companydescription').val();
+
+
+
+    if(IsValid(companyname)){
+      $('#companyname').html();
+      $('#companyname_error').show().delay(3000).slideUp();
+      $('#companyname_error').html('Please enter company name');
+      $('#companyname').focus();
+      return false;
+    }
+
+    
+    else{
+
+
+
+      var fd = new FormData();    
+      fd.append("companyname",companyname);
+      fd.append("games",JSON.stringify(games));
+
+      fd.append("companydescription",companydescription);
+      fd.append("csrfmiddlewaretoken","{{csrf_token}}");
+      $.ajax({
+        type: "POST",
+        url: frontend_url+"/company/add_company",
+        data: fd,
+        processData: false,
+        contentType: false,
+        
+        success: function(response) {
+          if(response.response.n ==1){
+            Swal.fire({
+              text: response.response.msg,
+              icon: 'success',
+            }).then((result) => {
+              window.location.href = "/company/company_list";
+      
+            });
+          }else{
+            Swal.fire({
+              text: response.response.msg,
+              icon: 'error',
+            })
+          }
+
+    
+        },
+      });
+
+
+
+
+
+    }
+  }
+
+
+</script>
+{% endblock %}

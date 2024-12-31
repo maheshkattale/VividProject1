@@ -1,0 +1,152 @@
+{% extends "index.html" %}
+{% load static %}
+{% block head %}
+
+{% endblock %}
+{% block heading %}
+  Add Game
+{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-end">
+
+
+</div>
+<div class="row">
+  <div class="row">
+    <div class="mb-3 col-lg-4">
+      <label for="gamename" class="form-label">Game Name <span class="text-danger">*</span> </label>
+      <input type="text" class="form-control" id="gamename" placeholder="Please enter name" aria-describedby="gamename_error" maxlength="250" oninput="this.value = this.value.replace(/[^a-zA-Z ]+/g,'').replace(/(\..*)\./g, '$1');"/>
+      <div id="gamename_error" class="form-text error_message"></div>
+    </div>
+
+
+    <div class="mb-3 col-lg-4">
+      <label for="gamestarttime" class="form-label">Game Start Time <span class="text-danger">*</span> </label>
+      <input type="time" class="form-control" id="gamestarttime" placeholder="Please select start time" aria-describedby="gamestarttime_error" maxlength="250"/>
+      <div id="gamestarttime_error" class="form-text error_message"></div>
+    </div>
+    <div class="mb-3 col-lg-4">
+      <label for="gameendtime" class="form-label">Game End Time <span class="text-danger">*</span> </label>
+      <input type="time" class="form-control" id="gameendtime" placeholder="Please select end time" aria-describedby="gameendtime_error" maxlength="250"/>
+      <div id="gameendtime_error" class="form-text error_message"></div>
+    </div>
+    
+    <div class="mb-3 col-lg-4">
+      <label for="minbetamount" class="form-label">Minimum Bidding Amount <span class="text-danger">*</span> </label>
+      <input type="text" class="form-control" id="minbetamount" placeholder="Please enter Minimum Bidding Amount" aria-describedby="minbetamount_error" maxlength="250" oninput="this.value = this.value.replace(/[^0-9]+/g,'').replace(/(\..*)\./g, '$1');"/>
+      <div id="minbetamount_error" class="form-text error_message"></div>
+    </div>
+
+    
+
+
+    <div class="mb-3 col-lg-12">
+      <label for="gamedescription" class="form-label">Game Description </label>
+      <textarea class="form-control" name="gamedescription"  maxlength="500" id="gamedescription" cols="30" rows="5" placeholder="Please enter Description" aria-describedby="gamedescription_error"></textarea>
+      <div id="gamedescription_error" class="form-text error_message"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="d-flex justify-content-center">
+      <a  class="btn btn-primary" onclick="validate_form();">Submit</a>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  $(document).ready(function () {
+  });
+
+
+  function validate_form(){
+    debugger
+    var gamename=$('#gamename').val();
+    var gamestarttime=$('#gamestarttime').val();
+    var gameendtime=$('#gameendtime').val();
+    var minbetamount=$('#minbetamount').val();
+    var gamedescription=$('#gamedescription').val();
+
+
+
+    if(IsValid(gamename)){
+      $('#gamename').html();
+      $('#gamename_error').show().delay(3000).slideUp();
+      $('#gamename_error').html('Please enter game name');
+      $('#gamename').focus();
+      return false;
+    }else if(IsValid(gamestarttime)){
+      $('#gamestarttime').html();
+      $('#gamestarttime_error').show().delay(3000).slideUp();
+      $('#gamestarttime_error').html('Please select game start time');
+      $('#gamestarttime').focus();
+      return false;
+    }else if(IsValid(gameendtime)){
+      $('#gameendtime').html();
+      $('#gameendtime_error').show().delay(3000).slideUp();
+      $('#gameendtime_error').html('Please select game end time');
+      $('#gameendtime').focus();
+      return false;
+    }else if(IsValid(minbetamount)){
+      $('#minbetamount').html();
+      $('#minbetamount_error').show().delay(3000).slideUp();
+      $('#minbetamount_error').html('Please minimum bidding amount');
+      $('#minbetamount').focus();
+      return false;
+    }
+
+    
+    else{
+
+
+
+      var fd = new FormData();    
+      fd.append("gamename",gamename);
+      fd.append("gamestarttime",gamestarttime);
+      fd.append("gameendtime",gameendtime);
+      fd.append("minbetamount",minbetamount);
+      fd.append("gamedescription",gamedescription);
+      fd.append("csrfmiddlewaretoken","{{csrf_token}}");
+      $.ajax({
+        type: "POST",
+        url: frontend_url+"/game/add_game",
+        data: fd,
+        processData: false,
+        contentType: false,
+        
+        success: function(response) {
+          if(response.response.n ==1){
+            Swal.fire({
+              text: response.response.msg,
+              icon: 'success',
+            }).then((result) => {
+              window.location.href = "/game/game_list";
+      
+            });
+          }else{
+            Swal.fire({
+              text: response.response.msg,
+              icon: 'error',
+            })
+          }
+
+    
+        },
+      });
+
+
+
+
+
+    }
+  }
+
+
+</script>
+{% endblock %}

@@ -54,6 +54,8 @@ INSTALLED_APPS = [
 
     'user',
     'wallet_transactions',
+    'company',
+    'game',
 
 
 ]

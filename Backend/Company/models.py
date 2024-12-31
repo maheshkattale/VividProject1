@@ -12,3 +12,6 @@ class CompanyMaster(TrackingModel):
     companygameendtime = models.TextField(null=True, blank=True)
     
 
+class CompanyGames(TrackingModel):
+    companyid = models.CharField(max_length=255,null=True, blank=True) 
+    gameid = models.CharField(max_length=255,null=True, blank=True) 

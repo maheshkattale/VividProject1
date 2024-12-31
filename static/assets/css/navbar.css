@@ -354,3 +354,14 @@ nav .navbar .links li:hover .js-sub-menu {
 .js-sub-menu {
     padding-left: 0px;
 }
+.error_message{
+    color: red !important;
+    text-transform: lowercase !important;
+}
+
+.select2-container--default .select2-selection--single {
+    background-color: #fff;
+    border: 1px solid #dadada;
+    border-radius: 5px !important;
+    min-height: 37px !important;
+}

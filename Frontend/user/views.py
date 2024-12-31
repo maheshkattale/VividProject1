@@ -49,7 +49,8 @@ class logout(GenericAPIView):
             tok = request.session.get('token', False)
             t = 'Token {}'.format(tok)
             headers = {'Authorization': t}
-            logout_request = requests.post(logout_url, headers=headers,data={'logouttoken':t})
+
+            logout_request = requests.post(logout_url, headers=headers,data={'logouttoken':tok})
             logout_response = logout_request.json()
             print("logout_response",logout_response)
             if logout_response['response']['n'] == 1:

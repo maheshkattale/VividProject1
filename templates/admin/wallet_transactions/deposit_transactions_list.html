@@ -1,0 +1,334 @@
+{% extends "index.html" %}
+{% load static %}
+{% block head %}
+
+{% endblock %}
+{% block heading %}
+Deposit Transactions
+{% endblock %}
+{% block actionsbuttons %}
+<!-- <a class="btn btn-info text-white" href="/wallet_transactions/add_wallet_transactions">Add wallet_transactions</a> -->
+{% endblock %}
+{% block body %}
+<div class="d-flex justify-content-end">
+
+  <div class="mb-3 col-lg-4 px-2">
+    <label for="user" class="form-label">User</label>
+    <input type="text" class="form-control" id="user" placeholder="Please enter user" aria-describedby="user_error"
+      maxlength="250" oninput="Pagination();" />
+    <div id="user_error" class="form-text error_message"></div>
+  </div>
+  <div class="mb-3 col-lg-4 px-2">
+    <label for="amount" class="form-label">Amount</label>
+    <input type="text" class="form-control" id="amount" placeholder="Please enter amount"
+      aria-describedby="amount_error" maxlength="250" oninput="Pagination();" />
+    <div id="amount_error" class="form-text error_message"></div>
+  </div>
+  <div class="mb-3 col-lg-4 px-2">
+    <label for="status" class="form-label">Status</label>
+
+
+    <select id="status" class="form-select select2" aria-describedby="status_erroredit" onchange="Pagination();">
+      <option value="" selected>Please select status</option>
+      <option value="completed">Completed</option>
+      <option value="pending">Pending</option>
+      <option value="rejected">Rejected</option>
+    </select>
+    <div id="status_erroredit" class="form-text error_message"></div>
+  </div>
+
+
+
+</div>
+<div class="row">
+  <table id="example" class="table table-striped table-bordered" style="width:100%">
+    <thead>
+      <tr>
+        <th style="width:10%">Sr No</th>
+        <th>User</th>
+        <th>Details</th>
+        <th>Status</th>
+        <th style="width:20%">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="table_body">
+
+    </tbody>
+  </table>
+  <div class=" d-flex justify-content-end m-3" id="secondpagination-demo2">
+    <ul id="pagination-demo2" class="pagination-sm"></ul>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  $(document).ready(function () {
+    Pagination();
+  });
+
+  function get_wallet_transactions_list(p) {
+    var amount = $('#amount').val()
+    var user = $('#user').val()
+    var status = $('#status').val()
+    var fd = new FormData()
+    fd.append('amount', amount)
+    fd.append('mobilenumber', user)
+    fd.append('transactionstatus', status)
+    fd.append('p', p)
+    fd.append('csrfmiddlewaretoken', '{{csrf_token}}')
+    $.ajax({
+      url: frontend_url + "/wallet_transactions/deposit_transactions",
+      data: fd,
+      type: 'POST',
+      processData: false,
+      contentType: false,
+      // beforeSend: function () {
+      //   Swal.fire({
+      //     icon: "info",
+      //     title: "",
+      //     text: "Loading...",
+      //     buttons: false,
+
+      //   });
+      // },
+      success: function (response) {
+        Swal.close();
+        var infohtml = ''
+
+        console.log('response d', response)
+        if (response.response.n == 1) {
+          var counter = 0
+
+          $.each(response.data, function (i, o) {
+            var email = ''
+            if (o.email != '' && o.email != null) {
+              email = o.email
+            }
+            counter += 1
+            infohtml += `
+                    <tr>
+                        <td>`+ counter + `</td>
+                        <td>`+ o.mobilenumber + `</td>
+                        <td>
+                          <div>Date : `+ o.date + ` - ` + o.time + `</div>
+                          <div>Amount :`+ o.amount + `</div>
+                          <div>Transaction ID :`+ o.transactionid + `</div>
+                          <div>Payment Type :`+ o.paymenttype + `</div>
+                          
+                        </td>
+                        <td>`+ o.transactionstatus + `</td>
+
+                        <td>
+                          ${o.transactionstatus == 'pending' ? `
+                          <a onclick="accept_deposit_request('`+ o.id + `');" class="btn btn-success" title="Accept" >Accept</a>
+                          <a onclick="reject_deposit_request('`+ o.id + `');" class="btn btn-danger" title="reject" >Reject</a>
+
+                          
+                          ` : ``}
+                          ${o.transactionstatus == 'rejected' ? `
+                          Rejection Reason : `+ o.rejectionreason + `
+                          
+                          `: ``}
+                        </td>
+                    </tr>
+                    `
+
+          });
+          $('#table_body').html(infohtml);
+          var totalfilter = Math.ceil(parseInt(response.response.count) / 10);
+          $('#pagination-demo2').twbsPagination({
+            totalPages: totalfilter,
+            visiblePages: 3,
+            next: 'Next',
+            prev: 'Prev',
+            onPageClick: function (event, page) {
+              var testflag = true;
+              //fetch content and render here
+              filternamepageno = page
+              if (testflag == true) {
+                testflag = false;
+                get_wallet_transactions_list(page)
+              }
+              $('#page-content').text('Page ' + page) + ' content here';
+            }
+          })
+
+
+
+
+        } else {
+          infohtml = `
+              <tr class="border-bottom text-center">
+                      <td colspan="6">No wallet transactions found</td>
+                  </tr>
+              `
+          $('#table_body').html(infohtml);
+
+          Swal.fire({
+            icon: "error",
+            title: "",
+            text: "No wallet transactions found !",
+            button: "Close",
+          });
+        }
+
+      }
+    })
+
+  }
+
+  function Pagination() {
+    var testflag = true;
+    $('#secondpagination-demo2').html('<ul id="pagination-demo2" class="pagination-sm"></ul>');
+    get_wallet_transactions_list(1);
+
+  }
+
+  function accept_deposit_request(id) {
+    debugger
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Accept it!"
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+
+        var fd = new FormData()
+        fd.append('wallet_transactions_id', id)
+        fd.append('csrfmiddlewaretoken', '{{csrf_token}}')
+        $.ajax({
+          url: frontend_url + "/wallet_transactions/accept_deposit_request",
+          data: fd,
+          type: 'POST',
+          processData: false,
+          contentType: false,
+          beforeSend: function () {
+            Swal.fire({
+              icon: "info",
+              title: "",
+              text: "Loading...",
+              buttons: false,
+
+            });
+          },
+          success: function (response) {
+            Swal.close();
+
+            console.log('response d', response)
+
+            if (response.response.n == 1) {
+              Swal.fire({
+                text: response.response.msg,
+                icon: 'success',
+              }).then((result) => {
+                window.location.href = "/wallet_transactions/deposit_transactions";
+
+              });
+            } else {
+              Swal.fire({
+                text: response.response.msg,
+                icon: 'error',
+              })
+            }
+          }
+        })
+
+      }
+    });
+  }
+
+  function reject_deposit_request(id) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You need to provide a reason for rejection.",
+      icon: "warning",
+      input: "text", // Adds a text input field
+      inputPlaceholder: "Enter rejection reason",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, reject it!",
+      inputValidator: (value) => {
+        if (!value) {
+          return "You need to write a reason!";
+        }
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const rejectionReason = result.value; // Get the rejection reason from input
+
+        // Prepare FormData
+        const fd = new FormData();
+        fd.append("wallet_transactions_id", id);
+        fd.append("rejectionreason", rejectionReason); // Add rejection reason
+        fd.append("csrfmiddlewaretoken", "{{csrf_token}}");
+
+        // Send AJAX request
+        $.ajax({
+          url: `${frontend_url}/wallet_transactions/reject_deposit_request`,
+          data: fd,
+          type: "POST",
+          processData: false,
+          contentType: false,
+          beforeSend: function () {
+            Swal.fire({
+              icon: "info",
+              title: "",
+              text: "Loading...",
+              showConfirmButton: false, // Disable buttons
+            });
+          },
+          success: function (response) {
+            Swal.close(); // Close the loading dialog
+            console.log("Response:", response);
+
+            if (response.response.n === 1) {
+              Swal.fire({
+                text: response.response.msg,
+                icon: "success",
+              }).then(() => {
+                window.location.href = "/wallet_transactions/deposit_transactions";
+              });
+            } else {
+              Swal.fire({
+                text: response.response.msg,
+                icon: "error",
+              });
+            }
+          },
+          error: function (xhr, status, error) {
+            // Handle AJAX errors
+            Swal.close();
+            console.error("Error:", error);
+            Swal.fire({
+              text: "An error occurred while processing your request. Please try again later.",
+              icon: "error",
+            });
+          },
+        });
+      }
+    });
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+{% endblock %}

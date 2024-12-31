@@ -23,7 +23,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     #frontend
     path('', include(('user.urls','user'),namespace="user")),
-    path('wallet_transactions', include(('wallet_transactions.urls','wallet_transactions'),namespace="wallet_transactions")),
+    path('wallet_transactions/', include(('wallet_transactions.urls','wallet_transactions'),namespace="wallet_transactions")),
+    path('company/', include(('company.urls','company'),namespace="company")),
+    path('game/', include(('game.urls','game'),namespace="game")),
 
     # backend
     path('api/User/', include(('User.urls','User'),namespace="User")),
